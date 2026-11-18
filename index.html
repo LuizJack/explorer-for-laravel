@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Laravel Explorer</title>
+  <title>Explorer for Laravel</title>
   <meta name="description" content="Explorador visual e interactivo de los procesos internos de Laravel: petición HTTP, eventos, colas, tareas programadas, inicio de sesión y API con Sanctum. Con tests para ponerte a prueba.">
 
   <!-- Vista previa al compartir el enlace (LinkedIn, WhatsApp, X…) -->
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Laravel Explorer">
-  <meta property="og:title" content="Laravel Explorer · Cómo funciona Laravel por dentro">
+  <meta property="og:site_name" content="Explorer for Laravel">
+  <meta property="og:title" content="Explorer for Laravel · Cómo funciona Laravel por dentro">
   <meta property="og:description" content="Mira animado, paso a paso, qué pasa dentro de Laravel en cada petición, job o inicio de sesión. Y ponte a prueba.">
-  <meta property="og:url" content="https://luizjack.github.io/laravel-explorer/">
-  <meta property="og:image" content="https://luizjack.github.io/laravel-explorer/og-image.png">
+  <meta property="og:url" content="https://luizjack.github.io/explorer-for-laravel/">
+  <meta property="og:image" content="https://luizjack.github.io/explorer-for-laravel/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Diagrama isométrico del ciclo de vida de una petición HTTP en Laravel">
   <meta property="og:locale" content="es_CO">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Laravel Explorer · Cómo funciona Laravel por dentro">
+  <meta name="twitter:title" content="Explorer for Laravel · Cómo funciona Laravel por dentro">
   <meta name="twitter:description" content="Mira animado, paso a paso, qué pasa dentro de Laravel en cada petición, job o inicio de sesión. Y ponte a prueba.">
-  <meta name="twitter:image" content="https://luizjack.github.io/laravel-explorer/og-image.png">
+  <meta name="twitter:image" content="https://luizjack.github.io/explorer-for-laravel/og-image.png">
 
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff2d20'/%3E%3Cpath d='M9 8v16h14' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c1627'/%3E%3Cpolygon points='16,6 25,11 16,16 7,11' fill='%23ff8a80'/%3E%3Cpolygon points='7,11 16,16 16,26 7,21' fill='%23ff2d20'/%3E%3Cpolygon points='25,11 16,16 16,26 25,21' fill='%23b3261c'/%3E%3C/svg%3E">
   <script>
     // Aplica el tema guardado antes de pintar, para evitar parpadeo.
     try { var t = localStorage.getItem('le-theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -41,7 +41,7 @@
           <polygon class="bm-right" points="30,14.5 20,20 20,31 30,25.5" />
         </svg>
         <div class="brand-text">
-          <span class="brand-name">LARAVEL <em>EXPLORER</em></span>
+          <span class="brand-name">EXPLORER <span class="bn-for">for</span> <em>LARAVEL</em></span>
           <span class="brand-sub">Cómo funciona Laravel por dentro</span>
         </div>
       </div>
@@ -51,9 +51,11 @@
       </label>
       <nav id="scenario-list" class="scenario-list"></nav>
       <p class="sidebar-foot">
-        <a href="https://github.com/LuizJack/laravel-explorer" target="_blank" rel="noopener">Código en GitHub</a> · si te sirve, déjale una estrella.<br>
+        <a href="https://github.com/LuizJack/explorer-for-laravel" target="_blank" rel="noopener">Código en GitHub</a> · si te sirve, déjale una estrella.<br>
+        <a href="https://github.com/LuizJack/explorer-for-laravel/issues/new/choose" target="_blank" rel="noopener">Propón un proceso</a> o corrige uno: se aceptan contribuciones.<br>
         Inspirado en <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener">Protocol Explorer</a> de Dilum Sanjaya.
       </p>
+      <p class="sidebar-foot legal">Proyecto independiente, no afiliado a Laravel ni respaldado por sus creadores. Laravel es una marca registrada de Laravel Holdings Inc.</p>
     </aside>
     <div class="scrim" id="scrim" hidden></div>
 
@@ -64,7 +66,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16 M4 12h16 M4 18h16"/></svg>
         </button>
         <div class="title-block">
-          <h1 id="scenario-name">Laravel Explorer</h1>
+          <h1 id="scenario-name">Explorer for Laravel</h1>
           <p id="tagline"></p>
         </div>
         <button class="quiz-open" id="btn-quiz" aria-label="Ponte a prueba">
@@ -188,5 +190,6 @@
   <script src="js/scenarios/sanctum.js"></script>
   <script src="js/app.js"></script>
   <script src="js/quiz.js"></script>
+  <script src="js/analytics.js"></script>
 </body>
 </html>

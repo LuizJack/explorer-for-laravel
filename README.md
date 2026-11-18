@@ -1,14 +1,16 @@
-# Laravel Explorer
+# Explorer for Laravel
 
-**▶ Demo en vivo: <https://luizjack.github.io/laravel-explorer/>**
+**▶ Demo en vivo: <https://luizjack.github.io/explorer-for-laravel/>**
 
 Explorador visual e interactivo de los procesos internos de **Laravel**. Cada proceso se divide en pasos, se dibujan los componentes que participan y se anima cada mensaje que viaja entre ellos. Al final puedes ponerte a prueba.
 
-![Laravel Explorer: ciclo de vida de una petición HTTP](og-image.png)
+![Explorer for Laravel: ciclo de vida de una petición HTTP](og-image.png)
 
 Si te sirve, déjale una estrella ⭐ al repositorio y compártelo con alguien que esté aprendiendo Laravel.
 
 Inspirado en [Protocol Explorer](https://protocol-explorer-alpha.vercel.app/) de Dilum Sanjaya, que hace lo mismo con los protocolos de red.
+
+> Proyecto independiente de la comunidad. No está afiliado a Laravel ni respaldado por sus creadores. Laravel es una marca registrada de Laravel Holdings Inc.
 
 ## Qué tiene
 
@@ -57,15 +59,19 @@ No tiene dependencias ni proceso de build. Cualquiera de estas opciones sirve:
 ## Estructura
 
 ```
-laravel-explorer/
+explorer-for-laravel/
 ├── index.html
 ├── og-image.png            # vista previa al compartir el enlace
+├── CONTRIBUTING.md         # guía para contribuir
+├── scripts/
+│   └── validate.js         # revisa que los procesos estén bien formados
 ├── css/
 │   └── styles.css          # estilos "plano técnico", tema claro/oscuro
 └── js/
     ├── app.js              # motor: vistas Red y Secuencia, animación, controles, tabla
     ├── icons.js            # íconos isométricos dibujados por código
     ├── quiz.js             # modo "Ponte a prueba"
+    ├── analytics.js        # estadísticas de uso opcionales (GoatCounter)
     └── scenarios/
         ├── http.js         # ciclo de vida de una petición
         ├── events.js       # eventos, listeners y difusión
@@ -137,7 +143,16 @@ Las aristas del diagrama se crean solas a partir de los mensajes, y si una líne
 - `kind`: `laptop`, `phone`, `server`, `block`, `stack`, `cylinder`, `db`, `cloud`
 - `glyph` (símbolo sobre la cara superior): `file`, `box`, `plug`, `gear`, `route`, `layers`, `code`, `table`, `layout`, `flag`, `send`, `briefcase`, `eye`, `key`, `user`, `hash`, `shield`, `bell`, `form`, `bolt`, `x`, `globe`, `mail`, `clock`, `calendar`, `terminal`, `lock`, `chart`, `braces`, `broadcast`
 
-Ideas para próximos procesos: migraciones, Livewire, validación con Form Requests, políticas y gates, caché, Octane.
+Antes de enviar un cambio, comprueba los procesos con `node scripts/validate.js`.
+
+## Contribuir
+
+Las contribuciones son bienvenidas: proponer un proceso, corregir una explicación o mejorar una pregunta.
+
+- **¿Tienes una idea?** Abre un issue con la plantilla [Proponer un proceso](https://github.com/LuizJack/explorer-for-laravel/issues/new/choose). No hace falta programarlo.
+- **¿Quieres escribirlo?** Lee la [guía para contribuir](CONTRIBUTING.md) y envía un pull request desde tu fork.
+
+Procesos que faltan: el contenedor de servicios, validación con Form Requests, migraciones, políticas y gates, caché, notificaciones, Livewire.
 
 ## Seguridad
 

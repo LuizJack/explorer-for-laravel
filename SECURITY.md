@@ -14,7 +14,7 @@ Responderé lo antes posible y te mantendré al tanto de la corrección.
 
 ## Alcance
 
-Laravel Explorer es un sitio estático (HTML, CSS y JavaScript) sin backend, sin dependencias y sin datos de usuarios. Los reportes más relevantes son los que afecten a quien abre la página, por ejemplo inyección de scripts (XSS).
+Explorer for Laravel es un sitio estático (HTML, CSS y JavaScript) sin backend, sin dependencias y sin datos de usuarios. Los reportes más relevantes son los que afecten a quien abre la página, por ejemplo inyección de scripts (XSS).
 
 ## Contribuciones
 
