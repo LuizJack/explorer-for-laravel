@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Reportar una vulnerabilidad
+    url: https://github.com/LuizJack/explorer-for-laravel/security/policy
+    about: No abras un issue público. Sigue la política de seguridad.
+  - name: Guía para contribuir
+    url: https://github.com/LuizJack/explorer-for-laravel/blob/main/CONTRIBUTING.md
+    about: Cómo proponer o escribir un proceso.

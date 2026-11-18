@@ -1,0 +1,53 @@
+name: Proponer un proceso
+description: Sugiere un proceso de Laravel que te gustaría ver animado (migraciones, validación, caché…).
+title: "Proceso: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por la propuesta. No hace falta que sepas programarlo: con explicar bien la idea es suficiente.
+  - type: input
+    id: proceso
+    attributes:
+      label: ¿Qué proceso propones?
+      placeholder: "Ejemplo: qué pasa al ejecutar php artisan migrate"
+    validations:
+      required: true
+  - type: textarea
+    id: motivo
+    attributes:
+      label: ¿Por qué vale la pena explicarlo?
+      description: ¿Qué suele confundir de este proceso? ¿Qué error ayuda a evitar?
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Componentes y pasos
+      description: Si lo sabes, enumera los componentes que participan y el orden en que se hablan. Un borrador basta.
+      placeholder: |
+        1. artisan lee la tabla migrations
+        2. compara con los archivos de database/migrations
+        3. ejecuta las pendientes dentro de un lote
+  - type: input
+    id: version
+    attributes:
+      label: Versión de Laravel
+      description: El proyecto sigue Laravel 11 y 12. Indica si tu propuesta depende de otra versión.
+      placeholder: "12"
+  - type: input
+    id: fuente
+    attributes:
+      label: Documentación de referencia
+      placeholder: https://laravel.com/docs/...
+  - type: dropdown
+    id: implementar
+    attributes:
+      label: ¿Quieres escribirlo tú?
+      options:
+        - "Sí, quiero enviar el pull request"
+        - "Puedo ayudar a revisarlo"
+        - "No, solo lo propongo"
+    validations:
+      required: true

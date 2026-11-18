@@ -1,0 +1,39 @@
+name: Reportar un error
+description: Algo está mal explicado, desactualizado o no funciona en la página.
+title: "Error: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: donde
+    attributes:
+      label: ¿Dónde está el error?
+      options:
+        - Petición HTTP
+        - Eventos y listeners
+        - Colas (jobs)
+        - Tareas programadas
+        - Inicio de sesión
+        - API con Sanctum
+        - Un test (Ponte a prueba)
+        - La página en general (diseño, animación, celular)
+    validations:
+      required: true
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: ¿Qué está mal?
+      description: Indica el paso, el mensaje o la pregunta, y qué debería decir o hacer.
+    validations:
+      required: true
+  - type: input
+    id: fuente
+    attributes:
+      label: Fuente
+      description: Si es un error de contenido, enlaza la documentación o el código de Laravel que lo confirma.
+      placeholder: https://laravel.com/docs/...
+  - type: input
+    id: navegador
+    attributes:
+      label: Navegador y dispositivo
+      description: Solo si es un problema de la página.
+      placeholder: "Chrome 142 en Android"
