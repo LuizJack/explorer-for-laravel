@@ -1,5 +1,5 @@
 /*
- * Laravel Explorer — motor de visualización.
+ * Explorer for Laravel — motor de visualización.
  * Lee los escenarios de window.SCENARIOS (js/scenarios/*.js), dibuja la vista
  * de red (íconos isométricos) y la vista de secuencia, y anima cada mensaje.
  * Sin dependencias: funciona abriendo index.html directamente.
@@ -228,7 +228,7 @@
 
     el.name.textContent = scenario.name;
     el.tagline.textContent = scenario.tagline;
-    document.title = scenario.name + ' · Laravel Explorer';
+    document.title = scenario.name + ' · Explorer for Laravel';
 
     buildSidebar();
     buildSteps();

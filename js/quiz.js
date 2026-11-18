@@ -1,5 +1,5 @@
 /*
- * Laravel Explorer — modo "Ponte a prueba".
+ * Explorer for Laravel — modo "Ponte a prueba".
  *
  * Dos modalidades por proceso:
  *   - Predice el siguiente paso: la animación se detiene y hay que elegir a qué
@@ -21,7 +21,7 @@
   if (!E || !el.panel) return;
 
   // Dirección pública de la demo; se usa al compartir si la página se abre en local.
-  const SITE_URL = 'https://luizjack.github.io/laravel-explorer/';
+  const SITE_URL = 'https://luizjack.github.io/explorer-for-laravel/';
 
   const MODES = {
     predict:   { name: 'Predice el siguiente paso', unit: 'reto',     units: 'retos' },
@@ -308,7 +308,10 @@
       : 'Buen primer intento. Mira el proceso paso a paso y vuelve.';
     const other = mode === 'predict' ? 'questions' : 'predict';
     const text = 'Saqué ' + score + ' de ' + total + ' en «' + E.scenario.name + '» (' + m.name.toLowerCase() +
-      ') en Laravel Explorer, una herramienta visual para entender cómo funciona Laravel por dentro. ¿Cuánto sacas tú?\n\n' + shareUrl();
+      ') en Explorer for Laravel, una herramienta visual para entender cómo funciona Laravel por dentro. ¿Cuánto sacas tú?\n\n' + shareUrl();
+
+    // Aviso para otros módulos (p. ej. js/analytics.js).
+    document.dispatchEvent(new CustomEvent('le:test', { detail: { id: E.scenario.id, name: E.scenario.name, mode, score, total } }));
 
     setHead('resultado');
     el.content.innerHTML =
