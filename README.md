@@ -71,7 +71,7 @@ explorer-for-laravel/
     ├── app.js              # motor: vistas Red y Secuencia, animación, controles, tabla
     ├── icons.js            # íconos isométricos dibujados por código
     ├── quiz.js             # modo "Ponte a prueba"
-    ├── analytics.js        # estadísticas de uso opcionales (GoatCounter)
+    ├── analytics.js        # contador de visitas (GoatCounter), solo en el sitio publicado
     └── scenarios/
         ├── http.js         # ciclo de vida de una petición
         ├── events.js       # eventos, listeners y difusión
@@ -153,6 +153,10 @@ Las contribuciones son bienvenidas: proponer un proceso, corregir una explicaci�
 - **¿Quieres escribirlo?** Lee la [guía para contribuir](CONTRIBUTING.md) y envía un pull request desde tu fork.
 
 Procesos que faltan: el contenedor de servicios, validación con Form Requests, migraciones, políticas y gates, caché, notificaciones, Livewire.
+
+## Estadísticas
+
+La demo publicada cuenta sus visitas con [GoatCounter](https://www.goatcounter.com), sin cookies ni datos personales. Registra la visita, el proceso que se abre y los tests que se terminan. En local y en los forks no se carga ni se cuenta nada (ver `js/analytics.js`).
 
 ## Seguridad
 
