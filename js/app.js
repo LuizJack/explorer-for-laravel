@@ -85,9 +85,13 @@
     playing: false,
     speed: 1,
     view: 'network',
+    locked: false,          // true mientras un módulo externo (el test) controla la reproducción
     rafId: null,
     timerId: null
   };
+
+  // Módulos externos (js/quiz.js) se enganchan aquí: ver window.LaravelExplorer más abajo.
+  const hooks = { scenario: [], render: [] };
 
   // ---------- Utilidades ----------
 
@@ -234,6 +238,7 @@
     buildTable();
     render();
     drawPacket(null);
+    hooks.scenario.forEach((fn) => fn());
   }
 
   function buildSteps() {
@@ -257,6 +262,7 @@
   function buildNetwork() {
     const root = el.svg;
     root.innerHTML = '';
+    root.classList.remove('has-focus');
 
     // Cuadrícula isométrica de fondo
     const defs = svg('defs', {}, root);
@@ -475,6 +481,8 @@
     el.btnNext.disabled = state.cursor >= state.events.length - 1;
     el.btnPlay.classList.toggle('playing', state.playing);
     el.playLabel.textContent = state.playing ? 'Pausar' : (state.cursor >= state.events.length - 1 ? 'Repetir' : 'Reproducir');
+
+    hooks.render.forEach((fn) => fn());
   }
 
   function scrollSequenceToCurrent() {
@@ -644,6 +652,7 @@
   document.addEventListener('keydown', (e) => {
     const tag = (e.target.tagName || '').toLowerCase();
     if (tag === 'select' || tag === 'input' || tag === 'textarea') return;
+    if (state.locked) { if (e.key === 'Escape') closeMenu(); return; }
     if (e.key === ' ' && tag !== 'button') { e.preventDefault(); togglePlay(); }
     else if (e.key === 'ArrowRight') { stop(); goTo(state.cursor + 1, true); }
     else if (e.key === 'ArrowLeft') { stop(); goTo(state.cursor - 1, false); }
@@ -652,15 +661,42 @@
     else if (e.key === 'Escape') { closeMenu(); }
   });
 
-  window.addEventListener('hashchange', () => loadScenario(location.hash.slice(1)));
+  // El hash puede traer un sufijo (#http/test); el proceso es la primera parte.
+  const hashId = () => location.hash.slice(1).split('/')[0];
+  window.addEventListener('hashchange', () => { if (!state.scenario || hashId() !== state.scenario.id) loadScenario(hashId()); });
   let resizeT;
   window.addEventListener('resize', () => {
     clearTimeout(resizeT);
     resizeT = setTimeout(() => { if (state.view === 'sequence') { buildSequence(); render(); drawPacket(state.events[state.cursor] || null, 1); } }, 200);
   });
 
+  // ---------- API para módulos externos ----------
+
+  window.LaravelExplorer = {
+    get scenario() { return state.scenario; },
+    get events() { return state.events; },
+    get cursor() { return state.cursor; },
+    node: (id) => state.nodes[id],
+    goTo,
+    stop,
+    setView,
+    setSpeed(v) { state.speed = v; },
+    restoreSpeed() { state.speed = parseFloat(el.speed.value) || 1; },
+    lock(v) { state.locked = !!v; },
+    // Resalta nodos sin depender del mensaje actual (p. ej. "¿quién envía el siguiente mensaje?").
+    focus(ids) {
+      const set = new Set(ids || []);
+      el.svg.classList.toggle('has-focus', set.size > 0);
+      el.svg.querySelectorAll('.node').forEach((g) => g.classList.toggle('asking', set.has(g.dataset.id)));
+    },
+    hint(id) {
+      el.svg.querySelectorAll('.node').forEach((g) => g.classList.toggle('hint', !!id && g.dataset.id === id));
+    },
+    on(name, fn) { if (hooks[name]) hooks[name].push(fn); }
+  };
+
   // ---------- Inicio ----------
 
   if (!scenarios.length) { el.stepTitle.textContent = 'No hay escenarios cargados'; return; }
-  loadScenario(location.hash.slice(1) || scenarios[0].id);
+  loadScenario(hashId() || scenarios[0].id);
 })();

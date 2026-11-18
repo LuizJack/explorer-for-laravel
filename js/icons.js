@@ -2,7 +2,7 @@
  * Íconos isométricos en SVG, dibujados por código (sin imágenes).
  * ISO.draw(parent, { kind, glyph, group }) dibuja un ícono centrado en (0,0).
  *
- * kind:  laptop | server | block | stack | cylinder | db | cloud
+ * kind:  laptop | phone | server | block | stack | cylinder | db | cloud
  * glyph: nombre de un símbolo de GLYPHS que se "pinta" sobre la cara superior.
  */
 window.ISO = (function () {
@@ -36,7 +36,14 @@ window.ISO = (function () {
     bolt:     'M13 2L4 14h7l-1 8 9-12h-7z',
     x:        'M6 6l12 12 M18 6L6 18',
     globe:    'M21 12a9 9 0 1 1-18 0a9 9 0 1 1 18 0 M3 12h18 M12 3c3.5 3.5 3.5 14.5 0 18 M12 3c-3.5 3.5-3.5 14.5 0 18',
-    mail:     'M3 6h18v12H3z M3 6l9 7 9-7'
+    mail:     'M3 6h18v12H3z M3 6l9 7 9-7',
+    clock:    'M21 12a9 9 0 1 1-18 0a9 9 0 1 1 18 0 M12 7v5l3 2',
+    calendar: 'M4 6h16v14H4z M4 10h16 M8 3v4 M16 3v4',
+    terminal: 'M3 5h18v14H3z M7 9l3 3-3 3 M12 15h5',
+    lock:     'M6 11h12v9H6z M8 11V8a4 4 0 0 1 8 0v3',
+    chart:    'M4 20V4 M4 20h16 M8 16v-4 M12 16V8 M16 16v-6',
+    braces:   'M8 4c-2 0-3 1-3 3v2c0 1.5-1 2-2 3 1 1 2 1.5 2 3v2c0 2 1 3 3 3 M16 4c2 0 3 1 3 3v2c0 1.5 1 2 2 3-1 1-2 1.5-2 3v2c0 2-1 3-3 3',
+    broadcast:'M14 12a2 2 0 1 1-4 0a2 2 0 1 1 4 0 M7.8 16.2a6 6 0 0 1 0-8.4 M16.2 7.8a6 6 0 0 1 0 8.4 M5 19a10 10 0 0 1 0-14 M19 5a10 10 0 0 1 0 14'
   };
 
   function el(tag, attrs, parent) {
@@ -105,6 +112,16 @@ window.ISO = (function () {
       const lines = el('g', { class: 'iso-detail' }, g);
       [34, 28, 22].forEach((z, i) => {
         el('polyline', { points: pts([[-20, -20, z], [i === 2 ? 4 : 18, -20, z]]) }, lines);
+      });
+      return top;
+    },
+    phone(g, o) {
+      const top = box(g, -17, -30, 0, 34, 60, 6);
+      face(g, [[-13, -24, 6], [13, -24, 6], [13, 20, 6], [-13, 20, 6]], 'shade-screen');
+      const d = el('g', { class: 'iso-detail' }, g);
+      el('polyline', { points: pts([[-5, 25, 6], [5, 25, 6]]) }, d);
+      [-16, -8, 0].forEach((y, i) => {
+        el('polyline', { points: pts([[-8, y, 6], [i === 2 ? 2 : 8, y, 6]]) }, d);
       });
       return top;
     },
