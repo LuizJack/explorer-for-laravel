@@ -1,15 +1,23 @@
 /*
- * Explorer for Laravel — estadísticas de uso (opcional).
+ * Explorer for Laravel — contador de visitas.
  *
- * Solo hace algo si index.html carga el script de GoatCounter (https://www.goatcounter.com),
- * que cuenta visitas sin cookies ni datos personales. Además de la visita a la página,
- * aquí se registra qué proceso se abre y qué tests se terminan, para saber cuáles se usan más.
+ * Usa GoatCounter (https://www.goatcounter.com): cuenta visitas sin cookies ni datos personales.
+ * Solo se activa en el sitio publicado; en local o en un fork no se carga ni se cuenta nada.
+ * Además de la visita a la página, registra qué proceso se abre y qué tests se terminan,
+ * para saber cuáles se usan más.
+ *
+ * Si publicas tu propia copia y quieres estadísticas, cambia SITE por tu dominio y tu cuenta.
  */
 (function () {
   'use strict';
 
+  const SITE = {
+    hostname: 'luizjack.github.io',
+    endpoint: 'https://explorer-for-laravel.goatcounter.com/count'
+  };
+
   const E = window.LaravelExplorer;
-  if (!E) return;
+  if (!E || location.hostname !== SITE.hostname) return;
 
   const pending = [];
   const ready = () => window.goatcounter && typeof window.goatcounter.count === 'function';
@@ -21,8 +29,14 @@
     const item = { path, title };
     if (ready()) send(item); else pending.push(item);
   }
-  // El script de GoatCounter carga en paralelo: lo que se registró antes se envía al terminar la carga.
-  window.addEventListener('load', () => { if (ready()) pending.splice(0).forEach(send); });
+
+  // El script de GoatCounter cuenta la visita por sí solo al cargar.
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://gc.zgo.at/count.js';
+  script.setAttribute('data-goatcounter', SITE.endpoint);
+  script.onload = () => { if (ready()) pending.splice(0).forEach(send); };
+  document.head.appendChild(script);
 
   const openProcess = () => track('proceso/' + E.scenario.id, 'Proceso: ' + E.scenario.name);
   E.on('scenario', openProcess);
