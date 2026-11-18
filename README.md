@@ -4,6 +4,14 @@ Explorador visual e interactivo de los procesos internos de **Laravel**. Cada pr
 
 Inspirado en [Protocol Explorer](https://protocol-explorer-alpha.vercel.app/) de Dilum Sanjaya, que hace lo mismo con los protocolos de red.
 
+## Qué tiene
+
+- **Vista Red:** cada componente (Nginx, PHP-FPM, Redis, MySQL, controladores, middleware…) es un ícono isométrico dibujado en SVG sobre una cuadrícula tipo plano técnico. Los mensajes viajan como paquetes animados con su tarjeta de tipo y contenido.
+- **Vista Secuencia:** el mismo proceso como diagrama de secuencia, con líneas de vida y flechas que se van marcando.
+- **Panel del paso actual:** explicación, datos clave y el código Laravel relevante.
+- **Flujo de mensajes:** tabla con tiempos, origen, destino y detalle de cada mensaje.
+- Menú lateral con buscador, tema claro/oscuro y diseño adaptable a celular.
+
 ## Procesos incluidos
 
 | Escenario | Qué muestra |
@@ -28,7 +36,7 @@ No tiene dependencias ni proceso de build. Cualquiera de estas opciones sirve:
 
   y abrir <http://localhost:8000>.
 
-**Atajos:** `Espacio` reproducir/pausar · `←` `→` evento anterior/siguiente · `Inicio` reiniciar.
+**Atajos:** `Espacio` reproducir/pausar · `←` `→` mensaje anterior/siguiente · `Inicio` reiniciar · `S` cambiar entre Red y Secuencia.
 También se puede enlazar un escenario directo: `index.html#queue`, `index.html#login`.
 
 ## Estructura
@@ -37,9 +45,10 @@ También se puede enlazar un escenario directo: `index.html#queue`, `index.html#
 laravel-explorer/
 ├── index.html
 ├── css/
-│   └── styles.css          # estilos, tema claro/oscuro automático
+│   └── styles.css          # estilos "plano técnico", tema claro/oscuro
 └── js/
-    ├── app.js              # motor: diagrama SVG, animación, controles, tabla
+    ├── app.js              # motor: vistas Red y Secuencia, animación, controles, tabla
+    ├── icons.js            # íconos isométricos dibujados por código
     └── scenarios/
         ├── http.js         # ciclo de vida de una petición
         ├── queue.js        # colas y reintentos
@@ -54,13 +63,16 @@ laravel-explorer/
    window.SCENARIOS = window.SCENARIOS || [];
    window.SCENARIOS.push({
      id: 'scheduler',                 // se usa en la URL: #scheduler
-     name: 'Scheduler',               // texto de la pestaña
+     name: 'Scheduler',               // texto en el menú lateral
+     category: 'Segundo plano',       // grupo del menú lateral
+     icon: { kind: 'block', glyph: 'gear', group: 'laravel' },  // ícono en el menú
      tagline: 'Cómo corre schedule:run cada minuto',
      nodes: [
        // x: 80–920, y: 110 / 300 / 490 (columnas cada 140 px)
        // group: client | server | laravel | data | external
        { id: 'cron', label: 'cron', sub: '* * * * *', x: 80, y: 300, group: 'server' },
-       { id: 'artisan', label: 'schedule:run', sub: 'artisan', x: 220, y: 300, group: 'laravel' }
+       { id: 'artisan', label: 'schedule:run', sub: 'artisan', x: 220, y: 300, group: 'laravel',
+         icon: { kind: 'block', glyph: 'gear' } }   // opcional; si no, se elige por id o por grupo
      ],
      steps: [
        {
@@ -85,6 +97,11 @@ laravel-explorer/
    ```
 
 Las aristas del diagrama se crean solas a partir de los eventos, y si una línea atraviesa otro nodo se dibuja curva.
+
+**Íconos disponibles** (`js/icons.js`):
+
+- `kind`: `laptop`, `server`, `block`, `stack`, `cylinder`, `db`, `cloud`
+- `glyph` (símbolo sobre la cara superior): `file`, `box`, `plug`, `gear`, `route`, `layers`, `code`, `table`, `layout`, `flag`, `send`, `briefcase`, `eye`, `key`, `user`, `hash`, `shield`, `bell`, `form`, `bolt`, `x`, `globe`, `mail`
 
 Ideas para próximos escenarios: Scheduler, eventos y listeners, broadcasting con Reverb, Livewire, Octane, migraciones, Sanctum (API tokens).
 
