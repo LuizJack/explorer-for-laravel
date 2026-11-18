@@ -5,6 +5,8 @@ window.SCENARIOS = window.SCENARIOS || [];
 window.SCENARIOS.push({
   id: 'login',
   name: 'Inicio de sesión',
+  category: 'Seguridad',
+  icon: { kind: 'block', glyph: 'key', group: 'laravel' },
   tagline: 'Del formulario de login a la cookie de sesión autenticada',
   nodes: [
     { id: 'browser',    label: 'Navegador',         sub: 'POST /login',            x: 80,  y: 300, group: 'client' },

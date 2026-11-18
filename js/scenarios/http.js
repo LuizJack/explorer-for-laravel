@@ -6,6 +6,8 @@ window.SCENARIOS = window.SCENARIOS || [];
 window.SCENARIOS.push({
   id: 'http',
   name: 'Petición HTTP',
+  category: 'Ciclo de vida',
+  icon: { kind: 'server', glyph: 'globe', group: 'laravel' },
   tagline: 'Qué pasa desde que el navegador pide /multas/123 hasta que recibe el HTML',
   nodes: [
     { id: 'browser',    label: 'Navegador',        sub: '192.168.1.10',          x: 80,  y: 300, group: 'client' },

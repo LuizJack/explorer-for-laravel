@@ -5,6 +5,8 @@ window.SCENARIOS = window.SCENARIOS || [];
 window.SCENARIOS.push({
   id: 'queue',
   name: 'Colas (jobs)',
+  category: 'Segundo plano',
+  icon: { kind: 'stack', glyph: 'send', group: 'laravel' },
   tagline: 'Cómo un correo sale en segundo plano sin hacer esperar al usuario',
   nodes: [
     { id: 'browser',    label: 'Navegador',          sub: 'POST /multas',          x: 80,  y: 300, group: 'client' },
