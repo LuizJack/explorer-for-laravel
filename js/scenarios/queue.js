@@ -43,9 +43,9 @@ return redirect()->route('multas.show', $multa);`,
       facts: [['Driver', 'QUEUE_CONNECTION=redis'], ['Cola', 'default'], ['Modelo serializado como', 'ModelIdentifier (clase + id)'], ['Respuesta al usuario', '≈ 35 ms']],
       events: [
         { t: 0.000, from: 'browser',    to: 'controller', type: 'request',  label: 'POST /multas',   info: 'POST /multas · placa=ABC123, infraccion=C29', size: '1.4 KB' },
-        { t: 0.022, from: 'controller', to: 'bus',        type: 'queue',    label: 'dispatch()',     info: 'NotificarMulta::dispatch($multa)' },
-        { t: 0.024, from: 'bus',        to: 'redis',      type: 'queue',    label: 'RPUSH',          info: 'RPUSH queues:default {"uuid":"7c1e…","displayName":"App\\\\Jobs\\\\NotificarMulta","attempts":0}', size: '890 B' },
-        { t: 0.035, from: 'controller', to: 'browser',    type: 'response', label: '302 Found',      info: '302 → /multas/124 (el correo aún no se ha enviado)' }
+        { t: 0.022, from: 'controller', to: 'bus', ask: "El controlador llama NotificarMulta::dispatch($multa). ¿Quién recibe el job?",        type: 'queue',    label: 'dispatch()',     info: 'NotificarMulta::dispatch($multa)' },
+        { t: 0.024, from: 'bus',        to: 'redis', ask: "El Bus ya serializó el job y QUEUE_CONNECTION es redis. ¿Dónde lo deja?",      type: 'queue',    label: 'RPUSH',          info: 'RPUSH queues:default {"uuid":"7c1e…","displayName":"App\\\\Jobs\\\\NotificarMulta","attempts":0}', size: '890 B' },
+        { t: 0.035, from: 'controller', to: 'browser', ask: "El job quedó en la cola, pero el correo no ha salido. ¿A quién le responde ya el controlador?",    type: 'response', label: '302 Found',      info: '302 → /multas/124 (el correo aún no se ha enviado)' }
       ]
     },
     {
@@ -67,7 +67,7 @@ php artisan queue:restart`,
       facts: [['Proceso', 'larga duración (no por petición)'], ['Reservado en', 'queues:default:reserved'], ['Tras un deploy', 'php artisan queue:restart']],
       events: [
         { t: 0.400, from: 'supervisor', to: 'worker', type: 'internal', label: 'mantener vivo',  info: 'Supervisor mantiene 2 procesos queue:work en ejecución' },
-        { t: 0.410, from: 'worker',     to: 'redis',  type: 'queue',    label: 'pop',            info: 'Script Lua: LPOP queues:default → ZADD queues:default:reserved' },
+        { t: 0.410, from: 'worker',     to: 'redis', ask: "queue:work está libre y esperando. ¿A quién le pide trabajo?",  type: 'queue',    label: 'pop',            info: 'Script Lua: LPOP queues:default → ZADD queues:default:reserved' },
         { t: 0.411, from: 'redis',      to: 'worker', type: 'response', label: 'job (intento 1)', info: 'Payload NotificarMulta · attempts=1' }
       ]
     },
@@ -85,9 +85,9 @@ php artisan queue:restart`,
       facts: [['Rehidratación', 'Multa::findOrFail(124)'], ['Método', 'handle()'], ['Transporte', 'MAIL_MAILER=smtp']],
       events: [
         { t: 0.412, from: 'worker', to: 'job',  type: 'internal', label: 'handle()',  info: 'Deserializa el job y llama a handle()' },
-        { t: 0.413, from: 'job',    to: 'db',   type: 'sql',      label: 'multas',    info: 'select * from `multas` where `id` = 124 limit 1' },
+        { t: 0.413, from: 'job',    to: 'db', ask: "El job guardó solo el id de la multa. Para reconstruir el modelo, ¿a quién consulta?",   type: 'sql',      label: 'multas',    info: 'select * from `multas` where `id` = 124 limit 1' },
         { t: 0.415, from: 'db',     to: 'job',  type: 'response', label: '1 fila',    info: '1 fila · Multa #124 · 1.6 ms' },
-        { t: 0.420, from: 'job',    to: 'smtp', type: 'request',  label: 'SMTP',      info: 'EHLO app.transito.gov.co · STARTTLS · MAIL FROM' }
+        { t: 0.420, from: 'job',    to: 'smtp', ask: "handle() llama a Mail::send(). ¿Con quién se conecta para entregar el correo?", type: 'request',  label: 'SMTP',      info: 'EHLO app.transito.gov.co · STARTTLS · MAIL FROM' }
       ]
     },
     {
@@ -106,7 +106,7 @@ php artisan queue:retry all`,
       events: [
         { t: 30.42, from: 'smtp',   to: 'job',    type: 'error', label: 'timeout ✗',    info: 'TransportException: Connection to smtp.mailgun.org:587 timed out' },
         { t: 30.43, from: 'job',    to: 'worker', type: 'error', label: 'Exception',    info: 'El job lanza la excepción al worker (attempts=1 < tries=3)' },
-        { t: 30.44, from: 'worker', to: 'redis',  type: 'queue', label: 'release(10)',  info: 'ZREM reserved · ZADD queues:default:delayed (ahora + 10 s)' }
+        { t: 30.44, from: 'worker', to: 'redis', ask: "El job falló, pero le quedan intentos. ¿A dónde lo devuelve el worker?",  type: 'queue', label: 'release(10)',  info: 'ZREM reserved · ZADD queues:default:delayed (ahora + 10 s)' }
       ]
     },
     {
@@ -131,7 +131,7 @@ public function handle(): void
         { t: 40.46, from: 'worker', to: 'job',    type: 'internal', label: 'handle()',        info: 'Nuevo intento de handle()' },
         { t: 40.47, from: 'job',    to: 'smtp',   type: 'request',  label: 'SMTP',            info: 'MAIL FROM · RCPT TO · DATA (MultaRegistrada)', size: '24 KB' },
         { t: 41.10, from: 'smtp',   to: 'job',    type: 'response', label: '250 OK',          info: '250 2.0.0 OK queued as 8F3A2C' },
-        { t: 41.11, from: 'job',    to: 'db',     type: 'sql',      label: 'notificada_at',   info: 'update `multas` set `notificada_at` = now() where `id` = 124' }
+        { t: 41.11, from: 'job',    to: 'db', ask: "El correo por fin salió. ¿Dónde marca el job la multa como notificada?",     type: 'sql',      label: 'notificada_at',   info: 'update `multas` set `notificada_at` = now() where `id` = 124' }
       ]
     },
     {
@@ -154,6 +154,68 @@ public function failed(?Throwable $exception): void
         { t: 41.13, from: 'worker', to: 'redis',  type: 'queue',    label: 'ZREM reserved',   info: 'Job eliminado de queues:default:reserved · worker libre' },
         { t: 41.13, from: 'worker', to: 'failed', type: 'error', optional: true, label: '(solo si falla)', info: 'Ruta alternativa: tras 3 fallos → insert into `failed_jobs` + failed()' }
       ]
+    }
+  ],
+  quiz: [
+    {
+      q: "¿Por qué el usuario recibe su respuesta antes de que el correo salga?",
+      options: [
+        "Porque el controlador solo encola el job; lo ejecuta un worker en otro proceso",
+        "Porque el correo se envía desde el navegador",
+        "Porque PHP ejecuta el envío en un hilo paralelo",
+        "Porque Nginx guarda la respuesta en caché"
+      ],
+      answer: 0,
+      explain: "dispatch() serializa el job y lo deja en la cola. El controlador responde de inmediato y un proceso aparte (queue:work) hace el trabajo lento.",
+      nodes: ['controller', 'redis', 'worker']
+    },
+    {
+      q: "¿Cómo queda guardado el modelo Multa dentro del job en la cola?",
+      options: [
+        "Solo su clase y su id; el worker lo vuelve a buscar en la base de datos",
+        "Completo, con todos sus atributos y relaciones",
+        "Como una consulta SQL lista para ejecutar",
+        "No se guarda: el job lo recibe de la sesión del usuario"
+      ],
+      answer: 0,
+      explain: "El job guarda un identificador del modelo, no una copia. Así pesa poco y, al procesarse, trabaja con los datos actuales.",
+      nodes: ['job', 'db']
+    },
+    {
+      q: "Desplegaste código nuevo y los jobs siguen corriendo con la versión vieja. ¿Qué faltó?",
+      options: [
+        "Ejecutar php artisan queue:restart",
+        "Ejecutar php artisan cache:clear",
+        "Reiniciar MySQL",
+        "Nada: los workers leen el código nuevo en cada job"
+      ],
+      answer: 0,
+      explain: "queue:work carga Laravel una sola vez y se queda en memoria. Hay que pedirle que se reinicie tras cada despliegue; Supervisor lo vuelve a levantar con el código nuevo.",
+      nodes: ['worker', 'supervisor']
+    },
+    {
+      q: "Un job agota sus tres intentos. ¿Qué pasa con él?",
+      options: [
+        "Se guarda en failed_jobs y se llama a su método failed()",
+        "Se borra sin dejar rastro",
+        "Se reintenta para siempre",
+        "Vuelve al controlador que lo despachó"
+      ],
+      answer: 0,
+      explain: "Queda registrado con su excepción completa. Se puede revisar con queue:failed y reintentar con queue:retry.",
+      nodes: ['failed', 'worker']
+    },
+    {
+      q: "¿Por qué conviene que un job sea idempotente?",
+      options: [
+        "Porque puede ejecutarse más de una vez y no debe duplicar sus efectos",
+        "Porque así corre más rápido",
+        "Porque Redis solo acepta jobs idempotentes",
+        "Porque evita tener que serializarlo"
+      ],
+      answer: 0,
+      explain: "Con reintentos, un job puede correr dos veces: por ejemplo, si falla después de enviar el correo. Una marca como notificada_at evita repetir el envío.",
+      nodes: ['job']
     }
   ]
 });

@@ -46,7 +46,7 @@ location ~ \\.php$ {
       facts: [['Protocolo', 'HTTP/2 sobre TLS 1.3'], ['Nginx → PHP', 'FastCGI (socket Unix)'], ['Archivo ejecutado', 'public/index.php']],
       events: [
         { t: 0.000, from: 'browser', to: 'nginx', type: 'request',  label: 'GET /multas/123', info: 'GET /multas/123 HTTP/2 · Cookie: laravel_session=eyJp…', size: '612 B' },
-        { t: 0.001, from: 'nginx',   to: 'fpm',   type: 'request',  label: 'FastCGI',         info: 'FastCGI BEGIN_REQUEST · SCRIPT_FILENAME=/var/www/app/public/index.php', size: '1.1 KB' },
+        { t: 0.001, from: 'nginx',   to: 'fpm', ask: "Nginx ve que /multas/123 no es un archivo estático. ¿A quién le pasa la petición?",   type: 'request',  label: 'FastCGI',         info: 'FastCGI BEGIN_REQUEST · SCRIPT_FILENAME=/var/www/app/public/index.php', size: '1.1 KB' },
         { t: 0.002, from: 'fpm',     to: 'index', type: 'internal', label: 'index.php',       info: 'Worker PHP-FPM ejecuta public/index.php' }
       ]
     },
@@ -73,7 +73,7 @@ return Application::configure(basePath: dirname(__DIR__))
       facts: [['Contenedor', 'Illuminate\\Foundation\\Application'], ['Fase 1', 'register(): bindings'], ['Fase 2', 'boot(): rutas, eventos, gates'], ['Optimización', 'php artisan optimize']],
       events: [
         { t: 0.003, from: 'index',     to: 'app',       type: 'internal', label: 'autoload + app', info: 'require vendor/autoload.php · require bootstrap/app.php' },
-        { t: 0.006, from: 'app',       to: 'providers', type: 'internal', label: 'register()',     info: 'Registra bindings: db, cache, session, auth, router…' },
+        { t: 0.006, from: 'app',       to: 'providers', ask: "La Application ya existe, pero está vacía. ¿A quién llama para registrar los servicios (base de datos, sesión, auth)?", type: 'internal', label: 'register()',     info: 'Registra bindings: db, cache, session, auth, router…' },
         { t: 0.014, from: 'providers', to: 'app',       type: 'internal', label: 'boot()',         info: 'boot(): carga rutas, listeners, gates y policies' }
       ]
     },
@@ -98,7 +98,7 @@ ConvertEmptyStringsToNull::class,
       facts: [['Objeto', 'Illuminate\\Http\\Request'], ['Patrón', 'Pipeline (cebolla)'], ['Si el sitio está en mantenimiento', 'responde 503 aquí mismo']],
       events: [
         { t: 0.015, from: 'app',    to: 'kernel', type: 'request', label: 'Request',      info: 'handleRequest(Request::capture()) → HTTP Kernel' },
-        { t: 0.017, from: 'kernel', to: 'router', type: 'request', label: 'mw global ✓',  info: 'TrustProxies → HandleCors → TrimStrings → ConvertEmptyStringsToNull → Router' }
+        { t: 0.017, from: 'kernel', to: 'router', ask: "La petición cruzó el middleware global. ¿Quién decide qué ruta coincide con GET /multas/123?", type: 'request', label: 'mw global ✓',  info: 'TrustProxies → HandleCors → TrimStrings → ConvertEmptyStringsToNull → Router' }
       ]
     },
     {
@@ -137,13 +137,13 @@ SubstituteBindings::class,
 // {multa} → Multa::where('id', 123)->firstOrFail()`,
       facts: [['Sesión', 'Redis · SESSION_DRIVER=redis'], ['CSRF', 'no aplica a GET'], ['Consultas SQL', '2 (usuario y multa)'], ['Sin login', '302 → /login']],
       events: [
-        { t: 0.019, from: 'middleware', to: 'redis',      type: 'cache',    label: 'GET sesión',     info: 'StartSession: GET laravel_database_laravel_cache:9f2c…' },
+        { t: 0.019, from: 'middleware', to: 'redis', ask: "StartSession necesita la sesión del usuario y SESSION_DRIVER es redis. ¿A quién se la pide?",      type: 'cache',    label: 'GET sesión',     info: 'StartSession: GET laravel_database_laravel_cache:9f2c…' },
         { t: 0.020, from: 'redis',      to: 'middleware', type: 'response', label: 'sesión',         info: 'Sesión encontrada · login_web_59ba… = 7' },
-        { t: 0.021, from: 'middleware', to: 'db',         type: 'sql',      label: 'users',          info: 'Authenticate: select * from `users` where `id` = 7 limit 1' },
+        { t: 0.021, from: 'middleware', to: 'db', ask: "La sesión dice que es el usuario 7. ¿Dónde lo busca el middleware Authenticate?",         type: 'sql',      label: 'users',          info: 'Authenticate: select * from `users` where `id` = 7 limit 1' },
         { t: 0.023, from: 'db',         to: 'middleware', type: 'response', label: '1 fila',         info: '1 fila · Usuario #7 · 1.4 ms' },
         { t: 0.024, from: 'middleware', to: 'db',         type: 'sql',      label: 'multas',         info: 'SubstituteBindings: select * from `multas` where `id` = 123 limit 1' },
         { t: 0.026, from: 'db',         to: 'middleware', type: 'response', label: 'Multa #123',     info: '1 fila · Multa #123 · 1.8 ms' },
-        { t: 0.027, from: 'middleware', to: 'controller', type: 'request',  label: 'show($multa)',   info: 'Llama MultaController@show(Multa $multa)' }
+        { t: 0.027, from: 'middleware', to: 'controller', ask: "Sesión, usuario y modelo Multa están listos. ¿A quién le toca ahora?", type: 'request',  label: 'show($multa)',   info: 'Llama MultaController@show(Multa $multa)' }
       ]
     },
     {
@@ -185,7 +185,7 @@ SubstituteBindings::class,
 </x-app-layout>`,
       facts: [['Plantillas compiladas', 'storage/framework/views'], ['Estado', '200 OK'], ['Tamaño', '18 KB (text/html)'], ['Tiempo total', '≈ 47 ms']],
       events: [
-        { t: 0.032, from: 'controller', to: 'view',       type: 'internal', label: 'view()',            info: "view('multas.show', compact('multa'))" },
+        { t: 0.032, from: 'controller', to: 'view', ask: "El controlador ya tiene la multa con su infractor. ¿Quién genera el HTML?",       type: 'internal', label: 'view()',            info: "view('multas.show', compact('multa'))" },
         { t: 0.041, from: 'view',       to: 'middleware', type: 'response', label: 'HTML 18 KB',        info: 'HTML renderizado · 18 KB', size: '18 KB' },
         { t: 0.042, from: 'middleware', to: 'redis',      type: 'cache',    label: 'SET sesión',        info: 'StartSession guarda la sesión · SETEX … 7200' },
         { t: 0.043, from: 'middleware', to: 'kernel',     type: 'response', label: 'Response',          info: 'La Response sube por el pipeline · EncryptCookies cifra la cookie' },
@@ -211,9 +211,83 @@ public function terminate(Request $request, Response $response): void
 }`,
       facts: [['Método', '$kernel->terminate()'], ['Útil para', 'logs, métricas, auditoría'], ['Trabajo pesado', 'mejor en cola (ver escenario Colas)']],
       events: [
-        { t: 0.048, from: 'kernel',    to: 'terminate', type: 'internal', label: 'terminate()',  info: 'Middleware terminables · Log::info(…) a storage/logs/laravel.log' },
+        { t: 0.048, from: 'kernel',    to: 'terminate', ask: "El navegador ya recibió su página. ¿Qué ejecuta el Kernel antes de que el proceso PHP termine?", type: 'internal', label: 'terminate()',  info: 'Middleware terminables · Log::info(…) a storage/logs/laravel.log' },
         { t: 0.050, from: 'terminate', to: 'db',        type: 'sql',      label: 'auditoría',    info: 'afterResponse: insert into `consultas_auditoria` (multa_id, user_id, …)' }
       ]
+    }
+  ],
+  quiz: [
+    {
+      q: "¿Qué archivo PHP se ejecuta primero en cada petición a Laravel?",
+      options: [
+        "public/index.php",
+        "routes/web.php",
+        "bootstrap/app.php",
+        "app/Http/Controllers/Controller.php"
+      ],
+      answer: 0,
+      explain: "Nginx envía a public/index.php toda petición que no sea un archivo estático. Ese archivo carga el autoloader y crea la aplicación desde bootstrap/app.php.",
+      nodes: ['fpm', 'index']
+    },
+    {
+      q: "En un Service Provider, ¿cuál es la diferencia entre register() y boot()?",
+      options: [
+        "register() solo registra servicios en el contenedor; boot() corre cuando ya están todos registrados y puede usarlos",
+        "register() corre en cada petición y boot() solo la primera vez",
+        "register() es para rutas y boot() para la base de datos",
+        "No hay diferencia: son dos nombres para lo mismo"
+      ],
+      answer: 0,
+      explain: "Primero se llama register() en todos los providers y después boot() en todos. Por eso en boot() ya se puede usar cualquier servicio, y en register() no conviene.",
+      nodes: ['app', 'providers']
+    },
+    {
+      q: "La URL no coincide con ninguna ruta. ¿Dónde se detiene la petición?",
+      options: [
+        "En el Router, que lanza un 404 sin llegar a ningún controlador",
+        "En Nginx, que nunca llama a PHP",
+        "En el controlador, que devuelve una vista vacía",
+        "En Eloquent, al no encontrar la tabla"
+      ],
+      answer: 0,
+      explain: "El Router compara método y URI con las rutas registradas. Si ninguna coincide lanza NotFoundHttpException, que se convierte en la página 404.",
+      nodes: ['router']
+    },
+    {
+      q: "¿Qué convierte el {multa} de la URL en un objeto Multa listo para usar?",
+      options: [
+        "El route model binding, aplicado por el middleware SubstituteBindings",
+        "El controlador, con Multa::find() escrito a mano",
+        "Blade, al renderizar la vista",
+        "El Service Provider de rutas, al arrancar"
+      ],
+      answer: 0,
+      explain: "Como el parámetro del controlador está tipado como Multa, Laravel busca el registro por id antes de llamar al controlador. Si no existe, responde 404.",
+      nodes: ['middleware', 'db']
+    },
+    {
+      q: "¿Qué problema evita $multa->load('infractor')?",
+      options: [
+        "El problema N+1: una consulta extra por cada registro al acceder a la relación",
+        "Que el infractor se guarde dos veces",
+        "Que la vista se compile en cada petición",
+        "Un ataque de inyección SQL"
+      ],
+      answer: 0,
+      explain: "Sin carga anticipada, cada acceso a una relación dispara su propia consulta. Con load() o with() se traen todas en una sola.",
+      nodes: ['controller', 'model', 'db']
+    },
+    {
+      q: "¿Cuándo se ejecuta un job despachado con afterResponse()?",
+      options: [
+        "Después de enviar la respuesta al navegador, en el mismo proceso PHP",
+        "Antes de ejecutar el controlador",
+        "En un worker de la cola, minutos después",
+        "En la siguiente petición del mismo usuario"
+      ],
+      answer: 0,
+      explain: "El Kernel llama a terminate() cuando la respuesta ya salió. Sirve para trabajo corto; lo pesado va mejor a una cola.",
+      nodes: ['kernel', 'terminate']
     }
   ]
 });
